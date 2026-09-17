@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { User } from "better-auth";
+import { type User } from "@shared/types/auth.type";
 
 export const sessionQueryOptions = queryOptions({
   queryKey: ["session"],

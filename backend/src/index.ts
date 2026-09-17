@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { Hono, type Context } from "hono";
 import { auth } from "./lib/auth";
 import { cors } from "hono/cors";
+import productsRoutes from "./routes/product.route";
 
 const app = new Hono();
 
@@ -28,6 +29,8 @@ app.use("*", async (c: Context, next) => {
 });
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+app.route("/api", productsRoutes);
 
 serve(
   {

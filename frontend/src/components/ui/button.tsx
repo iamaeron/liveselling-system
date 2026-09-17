@@ -3,12 +3,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "cn";
 
 const button = cva(
-  "inline-flex select-none items-center border border-transparent justify-center gap-2 whitespace-nowrap rounded-full text-sm font-semibold transition-all disabled:pointer-events-none active:translate-y-0.5 will-change-transform disabled:opacity-70 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4.5 [&_svg:not([class*='text-'])]:opacity-80 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive relative",
+  "inline-flex select-none items-center border border-transparent justify-center gap-2 whitespace-nowrap rounded-full text-sm font-semibold transition-all disabled:pointer-events-none active:translate-y-0.5 will-change-transform disabled:opacity-70 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4.5 [&_svg:not([class*='text-'])]:opacity-90 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive relative",
   {
     variants: {
       variant: {
         primary:
-          "bg-primary dark:border-transparent border-blue-600 shadow-[inset_0_-1px_0_0_#2D72F5,inset_0_2px_0_0_#538FFF,0_3px_12px_0_#3078FF4D]! dark:shadow-[inset_0_2px_0_0_#538FFF]! text-primary-foreground hover:opacity-90",
+          "bg-primary dark:border-transparent border-pink-600 shadow-[inset_0_-1px_0_0_var(--color-pink-400),inset_0_2px_0_0_var(--color-pink-400),0_3px_12px_0_var(--color-pink-200)]! text-primary-foreground hover:opacity-90",
         destructive:
           "bg-destructive border-rose-700 shadow-[inset_0_-1px_0_0_var(--color-rose-500),inset_0_2px_0_0_var(--color-rose-400),0_3px_12px_0_color-mix(in_srgb,var(--color-rose-500)_30%,transparent)]! text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:

@@ -190,3 +190,12 @@ export const orderItem = pgTable("order_item", {
   quantity: integer("quantity").notNull(),
   unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
 });
+
+export const facebookPage = pgTable("facebook_page", {
+  id: text("id").primaryKey(), // Facebook Page ID
+  userId: text("user_id").notNull(), // Seller ID
+  pageName: text("page_name").notNull(),
+  pageAccessToken: text("page_access_token").notNull(), // Encrypted long-lived token
+  isConnected: boolean("is_connected").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});

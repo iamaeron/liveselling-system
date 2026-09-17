@@ -3,11 +3,14 @@ import { Field, FieldControl, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Checkbox, CheckboxIndicator } from "@/components/ui/checkbox";
 import { useSignUpMutation } from "@/lib/mutations/auth.mutation";
+import { useState } from "react";
+import { EyeIcon, EyeClosedIcon } from "@solar-icons/react/linear";
 
 const Login = () => {
+  const [viewPass, setViewPass] = useState(false);
   const { mutate: signIn, isPending, error } = useSignUpMutation();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
@@ -41,10 +44,26 @@ const Login = () => {
             <Field>
               <FieldLabel>Password</FieldLabel>
               <FieldControl
+                type={viewPass ? "text" : "password"}
                 name="password"
                 required
                 placeholder="Enter your password"
-                render={<Input />}
+                render={
+                  <Input
+                    rightSection={
+                      <button
+                        type="button"
+                        onClick={() => setViewPass(!viewPass)}
+                      >
+                        {viewPass ? (
+                          <EyeClosedIcon size={20} />
+                        ) : (
+                          <EyeIcon size={20} />
+                        )}
+                      </button>
+                    }
+                  />
+                }
               />
             </Field>
 

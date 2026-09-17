@@ -95,7 +95,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           value={value}
           onChange={handleChange}
           className={cn(
-            "file:text-foreground font-medium bg-zinc-50 selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex w-full min-w-0 rounded-md shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_1px_0_0_rgba(0,0,0,0.05),0_2px_4px_0_rgba(0,0,0,0.08),inset_0_1px_0_0_rgba(255,255,255,1)] placeholder:text-zinc-400 focus:bg-transparent text-zinc-600 focus:text-black px-3 py-1.5 transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent text-sm file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+            "file:text-foreground font-medium bg-zinc-50 selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex w-full min-w-0 rounded-full shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_1px_0_0_rgba(0,0,0,0.03),0_2px_4px_0_rgba(0,0,0,0.08),inset_0_1px_0_0_rgba(255,255,255,1)] placeholder:text-zinc-400 focus:bg-white text-zinc-600 focus:text-black px-3.5 py-1.5 transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent text-sm file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
             "focus:outline-none focus:ring-2 focus:ring-primary",
             "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
             leftSection && "pl-9",

@@ -3,6 +3,9 @@ import Login from "./pages/login";
 import SellerDashboard from "./pages/seller/dashboard";
 import { protectedLoader, publicOnlyLoader } from "./lib/protected-loader";
 import type { QueryClient } from "@tanstack/react-query";
+import { AppLayout } from "./layouts/app-layout";
+import SellerProducts from "./pages/seller/products";
+import SellerFacebookPage from "./pages/seller/facebook";
 
 export function createRouter(queryClient: QueryClient) {
   return createBrowserRouter([
@@ -18,10 +21,24 @@ export function createRouter(queryClient: QueryClient) {
     {
       path: "seller",
       loader: protectedLoader(queryClient),
+      Component: AppLayout,
       children: [
         {
           path: "dashboard",
           Component: SellerDashboard,
+        },
+        {
+          path: "products",
+          Component: SellerProducts,
+        },
+        {
+          path: "settings",
+          children: [
+            {
+              path: "facebook",
+              Component: SellerFacebookPage,
+            },
+          ],
         },
       ],
     },

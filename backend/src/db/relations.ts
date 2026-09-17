@@ -53,4 +53,10 @@ export const relations = defineRelations(schema, (r) => ({
       to: r.product.id,
     }),
   },
+  facebookPage: {
+    user: r.one.user({
+      from: r.facebookPage.userId,
+      to: r.user.id,
+    }),
+  },
 }));
