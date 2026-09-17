@@ -1,12 +1,9 @@
-import { NavLink, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { sessionQueryOptions } from "@/lib/session";
 import { authClient } from "@/lib/auth-client";
-import {
-  AltArrowDownIcon,
-  BagHeartIcon,
-  SidebarOpenIcon,
-} from "@solar-icons/react/linear";
+import { AltArrowDownIcon, SidebarOpenIcon } from "@solar-icons/react/linear";
+import { BagHeartIcon } from "@solar-icons/react/bold";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ActionIcon } from "@/components/ui/action-icon";
 import { sidebarNavigation } from "@/constants/nav-links";
@@ -26,13 +23,16 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="flex flex-col w-70 border-r border-zinc-200">
-      <header className="mb-6 flex items-center justify-between pl-4 pt-4 pr-2">
-        <div className="flex items-center gap-2">
-          <div className="bg-white shadow-xl shadow-black/5 rounded-md p-1">
-            <BagHeartIcon strokeWidth={2} size={20} className="text-pink-600" />
+    // <div className="w-76 p-2 flex">
+    <aside className="flex flex-col w-76 border border-zinc-200 bg-zinc-100">
+      <header className="flex items-center justify-between pl-4 pt-4 pr-2">
+        <div className="flex items-center gap-3 px-0.5">
+          <div className="flex items-center gap-2">
+            <BagHeartIcon strokeWidth={2} size={30} className="text-pink-600" />
+            <span className="font-bold text-lg font-serif text-pink-700">
+              Velo
+            </span>
           </div>
-          <span className="font-bold text-lg font-serif">Velo</span>
         </div>
         {/* <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded capitalize">
             {user?.role}
@@ -43,31 +43,8 @@ const Sidebar = () => {
         </ActionIcon>
       </header>
 
-      {/* main navs */}
-      <div className="flex-1">
-        {sidebarNavigation.map((section) => (
-          <div
-            key={section.group}
-            className="mb-4 pt-4 border-t border-zinc-100 first:border-0"
-          >
-            <div className="px-3">
-              <p className="text-xs font-medium capitalize text-zinc-400 px-2 mb-2">
-                {section.group.toLowerCase()}
-              </p>
-
-              <div className="space-y-0.5">
-                {section.items.map((item) => (
-                  <NavItem key={item.link} item={item} />
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="p-2 border-t border-zinc-100">
-        <button onClick={handleSignOut}>logout</button>
-        <div className="p-2  flex gap-2 items-center">
+      <div className="px-2 mt-5 mb-1">
+        <div className="hover:bg-zinc-200 py-1.5 px-2 rounded-lg flex gap-2 items-center">
           <Avatar>
             <AvatarFallback className="font-semibold">
               {user?.name.charAt(0)}
@@ -82,12 +59,40 @@ const Sidebar = () => {
             </span>
           </div>
 
-          <ActionIcon variant="ghost">
-            <AltArrowDownIcon strokeWidth={2} size={16} />
-          </ActionIcon>
+          {/* <ActionIcon variant="ghost"> */}
+          <AltArrowDownIcon strokeWidth={2} size={16} />
+          {/* </ActionIcon> */}
         </div>
       </div>
+
+      {/* main navs */}
+      <div className="flex-1">
+        {sidebarNavigation.map((section) => (
+          <div
+            key={section.group}
+            className="mb-4 border-t border-zinc-200 border-dashed group first:border-0"
+          >
+            <hr className="border-t border-white group-first:border-0 mb-4 border-dashed" />
+            <div className="px-3">
+              <p className="text-xs font-medium text-zinc-400 px-2 mb-2">
+                {section.group}
+              </p>
+
+              <div className="space-y-1">
+                {section.items.map((item) => (
+                  <NavItem key={item.link} item={item} />
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* <hr className="border-t border-zinc-200" /> */}
+      <div className="p-2">
+        <button onClick={handleSignOut}>logout</button>
+      </div>
     </aside>
+    // </div>
   );
 };
 

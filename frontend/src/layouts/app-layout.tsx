@@ -6,7 +6,7 @@ import { BellIcon } from "@solar-icons/react/linear";
 
 export function AppLayout() {
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-zinc-50">
       <Sidebar />
 
       {/* 2. Main Content Area where nested child routes render */}

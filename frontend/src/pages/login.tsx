@@ -5,6 +5,7 @@ import { Checkbox, CheckboxIndicator } from "@/components/ui/checkbox";
 import { useSignUpMutation } from "@/lib/mutations/auth.mutation";
 import { useState } from "react";
 import { EyeIcon, EyeClosedIcon } from "@solar-icons/react/linear";
+import { BagHeartIcon } from "@solar-icons/react/bold";
 
 const Login = () => {
   const [viewPass, setViewPass] = useState(false);
@@ -24,7 +25,13 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center">
       <div className="max-w-sm mx-auto w-full">
-        <header className="px-2 mb-7">
+        <header className="px-2 flex flex-col items-center mb-7">
+          <div className="flex items-center gap-1">
+            <BagHeartIcon strokeWidth={2} size={20} className="text-pink-600" />
+            <span className="font-bold text-lg font-serif text-pink-700">
+              Velo
+            </span>
+          </div>
           <h1 className="text-xl font-semibold text-center tracking-tight text-foreground">
             Log in to your account
           </h1>

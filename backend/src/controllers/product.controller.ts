@@ -1,8 +1,8 @@
 import { db } from "@/db";
-import type { Context } from "hono";
+import type { Handler } from "hono";
 
 export const productControllers = {
-  get: async (c: Context) => {
+  get: (async (c) => {
     const products = await db.query.product.findMany({
       limit: 20,
       with: {
@@ -15,5 +15,5 @@ export const productControllers = {
       success: true,
       message: "Products found!",
     });
-  },
+  }) satisfies Handler,
 };

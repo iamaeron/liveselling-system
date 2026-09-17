@@ -14,7 +14,10 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     alias: {
-      "@shared": path.resolve(__dirname, "../common"),
+      "@shared": path.resolve(import.meta.dirname, "../common"),
     },
+  },
+  server: {
+    allowedHosts: ["economy-static-ribcage.ngrok-free.dev"],
   },
 });

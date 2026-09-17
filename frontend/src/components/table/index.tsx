@@ -55,7 +55,7 @@ export function DataTable<TData extends RowData>({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-lg shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_1px_0_0_rgba(0,0,0,0.03),0_2px_4px_0_rgba(0,0,0,0.08),inset_0_1px_0_0_rgba(255,255,255,1)] bg-white">
+      <div className="text-zinc-700 overflow-x-auto rounded-lg shadow-[0_0_0_1px_rgba(0,0,0,0.05),0_1px_0_0_rgba(0,0,0,0.03),0_2px_4px_0_rgba(0,0,0,0.08),inset_0_1px_0_0_rgba(255,255,255,1)] bg-white">
         <table className="w-full text-sm">
           <thead className="bg-zinc-50">
             {table.getHeaderGroups().map((headerGroup) => (

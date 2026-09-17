@@ -7,7 +7,6 @@ import { hashPassword } from "better-auth/crypto";
 async function resetDatabase() {
   console.log("🧹 Resetting database...");
 
-  // Option A: Truncate tables with CASCADE (cleans data & resets auto-increment IDs)
   await db.execute(sql`
     TRUNCATE TABLE 
       "order_item",
@@ -16,6 +15,7 @@ async function resetDatabase() {
       "live_stream",
       "customer",
       "product",
+      "facebook_page",
       "verification",
       "account",
       "session",
@@ -50,7 +50,6 @@ async function seed() {
 
     if (adminUser) {
       console.log(`✅ Admin created: ${adminUser.email}`);
-      // Add credential account for Better Auth
       await db
         .insert(account)
         .values({
@@ -58,12 +57,9 @@ async function seed() {
           accountId: adminUser.id,
           providerId: "credential",
           userId: adminUser.id,
-          // Optional hashed password if you test password login manually
           password: hashedPassword,
         })
         .onConflictDoNothing();
-    } else {
-      console.log("ℹ️ Admin already exists, skipping...");
     }
 
     // 2. Seed Seller ("Kairo Collections")
@@ -80,23 +76,24 @@ async function seed() {
       .onConflictDoNothing()
       .returning();
 
-    if (sellerUser) {
-      console.log(`✅ Seller created: ${sellerUser.name}`);
-      await db
-        .insert(account)
-        .values({
-          id: nanoid(),
-          accountId: sellerUser.id,
-          providerId: "credential",
-          userId: sellerUser.id,
-          password: hashedPassword,
-        })
-        .onConflictDoNothing();
-    } else {
-      console.log("ℹ️ Seller 'Kairo Collections' already exists, skipping...");
+    if (!sellerUser) {
+      throw new Error("Failed to create seller user for seeding.");
     }
 
-    // 3. Seed 5 Products
+    console.log(`✅ Seller created: ${sellerUser.name}`);
+
+    await db
+      .insert(account)
+      .values({
+        id: nanoid(),
+        accountId: sellerUser.id,
+        providerId: "credential",
+        userId: sellerUser.id,
+        password: hashedPassword,
+      })
+      .onConflictDoNothing();
+
+    // 3. Seed Products scoped to Seller
     const productsToSeed = [
       {
         code: "3AB",
@@ -130,19 +127,20 @@ async function seed() {
       },
     ];
 
-    console.log("📦 Seeding 5 products...");
+    console.log("📦 Seeding 5 seller products...");
 
     for (const item of productsToSeed) {
       await db
         .insert(product)
         .values({
+          userId: sellerUser.id,
           code: item.code,
           name: item.name,
           price: item.price,
           stock: item.stock,
         })
         .onConflictDoUpdate({
-          target: product.code,
+          target: [product.userId, product.code],
           set: {
             name: item.name,
             price: item.price,

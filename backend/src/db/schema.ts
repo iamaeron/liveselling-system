@@ -4,6 +4,7 @@ import {
   timestamp,
   boolean,
   index,
+  uniqueIndex,
   pgEnum,
   uuid,
   integer,
@@ -14,8 +15,8 @@ import {
 export const holdStatusEnum = pgEnum("hold_status", [
   "reserved", // Stock temporarily held after "Mine Code"
   "confirmed", // Buyer clicked checkout/confirm
-  "expired", // Buyer failed to checkout within the time limit
-  "cancelled", // Released back to pool manually or by user
+  "expired", // Buyer failed to checkout within time limit
+  "cancelled", // Released back to pool
 ]);
 
 export const orderStatusEnum = pgEnum("order_status", [
@@ -27,6 +28,8 @@ export const orderStatusEnum = pgEnum("order_status", [
 
 export const userRole = pgEnum("user_role", ["admin", "seller"]);
 
+// --- AUTH TABLES (Better Auth Compatible) ---
+
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -36,7 +39,7 @@ export const user = pgTable("user", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .$onUpdate(() => new Date())
     .notNull(),
   role: userRole("role").default("seller").notNull(),
 });
@@ -49,7 +52,7 @@ export const session = pgTable(
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
-      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .$onUpdate(() => new Date())
       .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
@@ -78,7 +81,7 @@ export const account = pgTable(
     password: text("password"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
-      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .$onUpdate(() => new Date())
       .notNull(),
   },
   (table) => [index("account_userId_idx").on(table.userId)],
@@ -94,42 +97,73 @@ export const verification = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
-      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .$onUpdate(() => new Date())
       .notNull(),
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+export const facebookPage = pgTable("facebook_page", {
+  id: text("id").primaryKey(), // Facebook Page ID
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  pageName: text("page_name").notNull(),
+  pageAccessToken: text("page_access_token").notNull(),
+  pictureUrl: text("picture_url"),
+  isConnected: boolean("is_connected").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const product = pgTable(
   "product",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    code: varchar("code", { length: 50 }).notNull().unique(), // e.g., "3AB"
+    code: varchar("code", { length: 50 }).notNull(), // e.g., "3AB"
     name: varchar("name", { length: 255 }).notNull(),
     price: numeric("price", { precision: 10, scale: 2 }).notNull(),
-    stock: integer("stock").notNull().default(0), // Total active stock available
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    stock: integer("stock").notNull().default(0),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (table) => [index("idx_products_code").on(table.code)],
+  (table) => [
+    // Ensures "3AB" is unique per seller, not globally
+    uniqueIndex("idx_products_seller_code").on(table.userId, table.code),
+  ],
 );
 
 export const customer = pgTable(
   "customer",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    facebookPsid: varchar("facebook_psid", { length: 255 }).notNull().unique(), // Page-Scoped User ID for Messenger
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }), // Scoped to seller
+    facebookPsid: varchar("facebook_psid", { length: 255 }).notNull(),
     facebookName: varchar("facebook_name", { length: 255 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (table) => [index("idx_customers_psid").on(table.facebookPsid)],
+  (table) => [
+    uniqueIndex("idx_customers_seller_psid").on(
+      table.userId,
+      table.facebookPsid,
+    ),
+  ],
 );
 
 export const liveStream = pgTable("live_stream", {
   id: uuid("id").primaryKey().defaultRandom(),
-  facebookVideoId: varchar("facebook_video_id", { length: 255 }).notNull(),
+  facebookPageId: text("facebook_page_id")
+    .notNull()
+    .references(() => facebookPage.id, { onDelete: "cascade" }),
+  facebookVideoId: varchar("facebook_video_id", { length: 255 })
+    .notNull()
+    .unique(),
   title: varchar("title", { length: 255 }),
-  isActive: integer("is_active").default(1).notNull(), // 1 = active stream, 0 = ended
+  isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -145,15 +179,18 @@ export const stockHold = pgTable(
       .notNull(),
     liveStreamId: uuid("live_stream_id").references(() => liveStream.id),
 
-    // FB Webhook Tracking
-    commentId: varchar("comment_id", { length: 255 }).notNull().unique(), // Prevents duplicate claims from same comment
+    // Webhook Deduplication
+    commentId: varchar("comment_id", { length: 255 }).notNull().unique(),
 
     quantity: integer("quantity").notNull().default(1),
     status: holdStatusEnum("status").default("reserved").notNull(),
 
-    // Expiration strategy for holds
-    expiresAt: timestamp("expires_at").notNull(), // e.g., now + 15 minutes
+    expiresAt: timestamp("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
   },
   (table) => [
     index("idx_holds_product_status").on(table.productId, table.status),
@@ -164,13 +201,15 @@ export const stockHold = pgTable(
 
 export const order = pgTable("order", {
   id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }), // Scoped to seller
   customerId: uuid("customer_id")
     .references(() => customer.id)
     .notNull(),
   totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
   status: orderStatusEnum("status").default("pending_payment").notNull(),
 
-  // Shipping info collected via webview
   shippingAddress: text("shipping_address"),
   phoneNumber: varchar("phone_number", { length: 50 }),
   paymentProofUrl: text("payment_proof_url"),
@@ -184,18 +223,9 @@ export const orderItem = pgTable("order_item", {
   orderId: uuid("order_id")
     .references(() => order.id, { onDelete: "cascade" })
     .notNull(),
-  productId: uuid("product_id")
-    .references(() => product.id)
-    .notNull(),
+  productId: uuid("product_id").references(() => product.id, {
+    onDelete: "set null",
+  }),
   quantity: integer("quantity").notNull(),
   unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
-});
-
-export const facebookPage = pgTable("facebook_page", {
-  id: text("id").primaryKey(), // Facebook Page ID
-  userId: text("user_id").notNull(), // Seller ID
-  pageName: text("page_name").notNull(),
-  pageAccessToken: text("page_access_token").notNull(), // Encrypted long-lived token
-  isConnected: boolean("is_connected").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
 });

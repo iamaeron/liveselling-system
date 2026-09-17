@@ -16,10 +16,10 @@ const NavItem = ({ item }: NavItemProps) => {
     <NavLink
       to={item.link}
       className={({ isActive }) =>
-        `flex items-center active:scale-98 gap-3 px-2 py-1.5 rounded-lg text-sm font-medium transition-[colors,scale] will-change-transform ${
+        `flex items-center active:scale-98 gap-3 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-[colors,scale] will-change-transform ${
           isActive
-            ? "bg-pink-50 text-pink-700"
-            : "text-muted-foreground hover:bg-accent hover:text-zinc-700"
+            ? "bg-white text-pink-700 shadow-lg shadow-black/3"
+            : "text-muted-foreground border-transparent hover:bg-zinc-200 hover:text-zinc-700"
         }`
       }
     >

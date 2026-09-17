@@ -1,14 +1,17 @@
 import type { tableFeatureSet } from "@/components/table/table-features";
 import { useFetchProducts } from "@/lib/fetcher/product.fetcher";
 import { createColumnHelper } from "@tanstack/react-table";
-import type { Product } from "@shared/types/db.type";
+import type { GetProductsReturnValue } from "@shared/types/db.type";
 import { DataTable } from "@/components/table";
 import { ActionIcon } from "@/components/ui/action-icon";
 import { MenuDotsIcon } from "@solar-icons/react/bold";
 import { Button } from "@/components/ui/button";
 import { AddIcon } from "@solar-icons/react/linear";
 
-const columnHelper = createColumnHelper<typeof tableFeatureSet, Product>();
+const columnHelper = createColumnHelper<
+  typeof tableFeatureSet,
+  GetProductsReturnValue
+>();
 
 const columns = columnHelper.columns([
   columnHelper.display({
@@ -45,6 +48,11 @@ const columns = columnHelper.columns([
   columnHelper.accessor("stock", {
     header: "Stock",
     cell: (info) => <span>{info.getValue()}</span>,
+    size: 100,
+  }),
+  columnHelper.accessor("holds", {
+    header: "On Hold",
+    cell: (info) => <span>{info.getValue().length}</span>,
     size: 100,
   }),
   columnHelper.display({

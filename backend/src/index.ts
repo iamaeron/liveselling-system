@@ -3,6 +3,7 @@ import { Hono, type Context } from "hono";
 import { auth } from "./lib/auth";
 import { cors } from "hono/cors";
 import productsRoutes from "./routes/product.route";
+import facebookRoutes from "./routes/facebook.route";
 
 const app = new Hono();
 
@@ -31,6 +32,7 @@ app.use("*", async (c: Context, next) => {
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.route("/api", productsRoutes);
+app.route("/api", facebookRoutes);
 
 serve(
   {

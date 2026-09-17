@@ -8,7 +8,7 @@ import {
   //   ShareIcon,
   SettingsMinimalisticIcon,
   FlagIcon,
-} from "@solar-icons/react/linear";
+} from "@solar-icons/react/bold-duotone";
 
 import {
   Widget3Icon as Widget3IconBold,

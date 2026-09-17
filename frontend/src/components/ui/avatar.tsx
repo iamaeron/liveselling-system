@@ -7,7 +7,7 @@ function Avatar({ className, ...props }: AvatarProps) {
   return (
     <BaseAvatar.Root
       className={cn(
-        "inline-flex size-8 items-center shrink-0 justify-center overflow-hidden rounded-full bg-muted align-middle text-sm leading-none font-normal",
+        "inline-flex size-8 items-center shrink-0 justify-center overflow-hidden rounded-full bg-primary align-middle text-sm text-white leading-none font-normal",
         className,
       )}
       {...props}
