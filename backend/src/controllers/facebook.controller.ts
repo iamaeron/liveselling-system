@@ -9,7 +9,7 @@ import {
 import { ensureLiveStreamExists } from "@/lib/ensure-livestream";
 import { parseCommentClaim } from "@/lib/parse-comment-claim";
 import "dotenv/config";
-import { eq } from "drizzle-orm";
+import { and, eq, gte } from "drizzle-orm";
 import type { Handler } from "hono";
 
 const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000;
@@ -86,14 +86,26 @@ export const facebookControllers = {
                 return c.text("PRODUCT_NOT_FOUND_HANDLED", 200);
               }
 
-              const productStockHolds = await db.query.stockHold.findMany({
-                where: {
-                  productId: foundProduct.id,
-                },
-                columns: {
-                  quantity: true,
-                },
-              });
+              // const productStockHolds = await db.query.stockHold.findMany({
+              //   where: {
+              //     productId: foundProduct.id,
+              //   },
+              //   columns: {
+              //     quantity: true,
+              //   },
+              // });
+
+              const productStockHolds = await db
+                .select({ quantity: stockHold.quantity })
+                .from(stockHold)
+                .where(
+                  and(
+                    eq(stockHold.userId, page.userId),
+                    eq(stockHold.productId, foundProduct.id),
+                    eq(stockHold.status, "reserved"),
+                    gte(stockHold.expiresAt, new Date()),
+                  ),
+                );
 
               const productWithHeldStock = productStockHolds.reduce(
                 (sum, hold) => sum + hold.quantity,
@@ -137,14 +149,6 @@ export const facebookControllers = {
                     quantity: claim.quantity,
                     liveStreamId: foundLiveStream.id,
                   });
-
-                  // reduce the stock
-                  await db
-                    .update(product)
-                    .set({
-                      stock: available - claim.quantity,
-                    })
-                    .where(eq(product.id, foundProduct.id));
 
                   return c.text("PRODUCT_CLAIMED_SUCCESSFULLY", 200);
                 } catch (e: any) {

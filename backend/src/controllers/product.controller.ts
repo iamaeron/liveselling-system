@@ -10,6 +10,11 @@ export const productControllers = {
           columns: {
             quantity: true,
           },
+          where: {
+            expiresAt: {
+              gte: new Date(),
+            },
+          },
         },
       },
     });

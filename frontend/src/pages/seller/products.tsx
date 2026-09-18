@@ -45,10 +45,16 @@ const columns = columnHelper.columns([
     ),
     size: 140,
   }),
-  columnHelper.accessor("stock", {
+  columnHelper.accessor((row) => row, {
     header: "Stock",
-    cell: (info) => <span>{info.getValue()}</span>,
     size: 100,
+    cell: (info) => {
+      const totalWithHeld = info
+        .getValue()
+        .holds.reduce((sum, prod) => sum + prod.quantity, 0);
+
+      return <span>{info.getValue().stock - totalWithHeld}</span>;
+    },
   }),
   columnHelper.accessor("holds", {
     header: "On Hold",

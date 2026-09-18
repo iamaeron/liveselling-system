@@ -1,4 +1,6 @@
 import { db } from "@/db";
+import { stockHold } from "@/db/schema";
+import { and, eq, gte } from "drizzle-orm";
 import type { Handler } from "hono";
 
 export const stockHoldControllers = {
@@ -9,6 +11,8 @@ export const stockHoldControllers = {
     const stockHolds = await db.query.stockHold.findMany({
       where: {
         userId: user.id,
+        status: "reserved",
+        expiresAt: { gte: new Date() },
       },
       limit: 20,
       with: {

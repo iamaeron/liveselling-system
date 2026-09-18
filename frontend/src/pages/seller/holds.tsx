@@ -10,12 +10,22 @@ import {
   MenuPopup,
   MenuPortal,
   MenuPositioner,
+  MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu";
 import { useFetchStockHolds } from "@/lib/fetcher/stock-hold.fetcher";
 import type { GetStockHoldsReturnValue } from "@shared/types/db.type";
 import { MenuDotsIcon } from "@solar-icons/react/bold";
-import { AddIcon, LinkMinimalistic2Icon } from "@solar-icons/react/linear";
+import {
+  AddIcon,
+  AlarmAddIcon,
+  ChatRoundIcon,
+  CloseIcon,
+  LinkMinimalistic2Icon,
+  RepeatIcon,
+  Tuning2Icon,
+  UndoLeftRoundIcon,
+} from "@solar-icons/react/linear";
 import { createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<
@@ -26,9 +36,9 @@ const columnHelper = createColumnHelper<
 const columns = columnHelper.columns([
   columnHelper.display({
     id: "rowNumber",
-    header: "#",
+    header: () => <span className="text-zinc-400">#</span>,
     size: 48,
-    cell: (info) => info.row.index + 1,
+    cell: (info) => <span className="text-zinc-400">{info.row.index + 1}</span>,
     meta: { align: "center" },
   }),
   columnHelper.accessor("customer.facebookName", {
@@ -82,7 +92,7 @@ const columns = columnHelper.columns([
   columnHelper.accessor((row) => row, {
     header: " ",
     size: 48,
-    cell: (info) => (
+    cell: () => (
       <div>
         <Menu>
           <MenuTrigger render={<ActionIcon variant="ghost" />}>
@@ -90,15 +100,53 @@ const columns = columnHelper.columns([
           </MenuTrigger>
           <MenuPortal>
             <MenuPositioner align="end" sideOffset={6}>
-              <MenuPopup>
+              <MenuPopup className="min-w-56">
                 {/* <MenuGroupLabel>{info.getValue().}</MenuGroupLabel> */}
                 <MenuItem>
-                  <LinkMinimalistic2Icon size={16} />
-                  Copy Portal Link
+                  <LinkMinimalistic2Icon
+                    strokeWidth={2}
+                    size={16}
+                    className="text-zinc-600"
+                  />
+                  Copy Checkout Link
                 </MenuItem>
                 <MenuItem>
-                  <LinkMinimalistic2Icon size={16} />
-                  Send to Messenger
+                  <ChatRoundIcon
+                    strokeWidth={2}
+                    size={16}
+                    className="text-zinc-600"
+                  />
+                  View Comment on Facebook
+                </MenuItem>
+                <MenuSeparator />
+                <MenuItem>
+                  <AlarmAddIcon
+                    strokeWidth={2}
+                    size={16}
+                    className="text-zinc-600"
+                  />
+                  Extend Reservation Time
+                </MenuItem>
+                <MenuItem>
+                  <RepeatIcon
+                    strokeWidth={2}
+                    size={16}
+                    className="text-zinc-600"
+                  />
+                  Convert to Manual Order
+                </MenuItem>
+                <MenuItem>
+                  <Tuning2Icon
+                    strokeWidth={2}
+                    size={16}
+                    className="text-zinc-600"
+                  />
+                  Adjust Quantity
+                </MenuItem>
+                <MenuSeparator />
+                <MenuItem className="text-rose-700">
+                  <UndoLeftRoundIcon strokeWidth={2} size={16} />
+                  Release Hold
                 </MenuItem>
               </MenuPopup>
             </MenuPositioner>
@@ -111,7 +159,7 @@ const columns = columnHelper.columns([
 
 const SellerStockHolds = () => {
   const { data, isPending } = useFetchStockHolds();
-
+  console.log(data);
   return (
     <div>
       <header className="mb-6">
