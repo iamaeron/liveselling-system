@@ -171,6 +171,10 @@ export const stockHold = pgTable(
   "stock_hold",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    // 🔑 Explicit Seller / Tenant Ownership
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
     productId: uuid("product_id")
       .references(() => product.id, { onDelete: "cascade" })
       .notNull(),
@@ -193,6 +197,12 @@ export const stockHold = pgTable(
       .notNull(),
   },
   (table) => [
+    // ⚡ Fast Dashboard & Cleanup Queries
+    index("idx_holds_seller_status").on(
+      table.userId,
+      table.status,
+      table.expiresAt,
+    ),
     index("idx_holds_product_status").on(table.productId, table.status),
     index("idx_holds_customer_status").on(table.customerId, table.status),
     index("idx_holds_comment").on(table.commentId),

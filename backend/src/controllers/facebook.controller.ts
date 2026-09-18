@@ -1,9 +1,18 @@
 import { db } from "@/db";
-import { facebookPage } from "@/db/schema";
+import {
+  customer,
+  facebookPage,
+  liveStream,
+  product,
+  stockHold,
+} from "@/db/schema";
+import { ensureLiveStreamExists } from "@/lib/ensure-livestream";
+import { parseCommentClaim } from "@/lib/parse-comment-claim";
 import "dotenv/config";
 import { eq } from "drizzle-orm";
 import type { Handler } from "hono";
 
+const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000;
 const VERIFY_TOKEN = process.env.FB_WEBHOOK_SECRET_TOKEN;
 const FB_APP_ID = process.env.FACEBOOK_APP_ID!;
 const FB_APP_SECRET = process.env.FACEBOOK_APP_SECRET!;
@@ -13,15 +22,145 @@ export const facebookControllers = {
   get: (async (c) => {
     const mode = c.req.query("hub.mode");
     const token = c.req.query("hub.verify_token");
-    const challenge = c.req.query("hub.challenge");
+    const challenge = c.req.query("hub.challenge")!;
 
     if (mode === "subscribe" && token === VERIFY_TOKEN) {
-      console.log("✅ Webhook verified successfully by Meta!");
-      return c.text(challenge || "", 200);
+      console.log("Webhook verified successfully!");
+      return c.text(challenge, 200);
     }
 
-    console.error("❌ Webhook verification failed. Token mismatch.");
     return c.text("Forbidden", 403);
+  }) satisfies Handler,
+  post: (async (c) => {
+    const body = await c.req.json();
+
+    console.log("Incoming Webhook Event:", JSON.stringify(body, null, 2));
+
+    if (body.object === "page") {
+      for (const entry of body.entry) {
+        const pageId = entry.id;
+
+        const page = await db.query.facebookPage.findFirst({
+          where: {
+            id: pageId,
+          },
+        });
+
+        if (!page) {
+          return c.text("PAGE_NOT_FOUND", 200);
+        }
+
+        for (const change of entry.changes) {
+          // Filter strictly for new comments on the feed
+          if (
+            change.field === "feed" &&
+            change.value?.item === "comment" &&
+            change.value?.verb === "add"
+          ) {
+            const comment = change.value;
+
+            const commentId = comment.comment_id;
+            const postId = comment.post_id;
+            const senderId = comment.from?.id;
+            const senderName = comment.from?.name;
+            const messageText = comment.message?.trim(); // e.g., "Mine 3AB"
+            const sentAt = comment.created_time;
+
+            const claim = parseCommentClaim(messageText);
+
+            if (claim) {
+              console.log(
+                `Valid Claim Detected! Buyer: ${senderName} (${senderId}) | Code: ${claim.code} | Qty: ${claim.quantity}`,
+              );
+
+              const foundProduct = await db.query.product.findFirst({
+                where: {
+                  code: claim.code,
+                },
+              });
+
+              if (!foundProduct) {
+                console.warn(
+                  `[Claim Ignored] Code "${claim.code}" not found for Page ${pageId}`,
+                );
+                return c.text("PRODUCT_NOT_FOUND_HANDLED", 200);
+              }
+
+              const productStockHolds = await db.query.stockHold.findMany({
+                where: {
+                  productId: foundProduct.id,
+                },
+                columns: {
+                  quantity: true,
+                },
+              });
+
+              const productWithHeldStock = productStockHolds.reduce(
+                (sum, hold) => sum + hold.quantity,
+                0,
+              );
+              const available = foundProduct.stock - productWithHeldStock;
+
+              if (available >= claim.quantity) {
+                try {
+                  // insert customer first
+                  const [createdCustomer] = await db
+                    .insert(customer)
+                    .values({
+                      facebookPsid: senderId,
+                      facebookName: senderName,
+                      userId: page.userId,
+                    })
+                    .onConflictDoUpdate({
+                      target: [customer.userId, customer.facebookPsid],
+                      set: {
+                        facebookName: senderName,
+                      },
+                    })
+                    .returning();
+
+                  const foundLiveStream = await ensureLiveStreamExists(
+                    page.id,
+                    postId,
+                  );
+
+                  if (!foundLiveStream)
+                    return c.text("PRODUCT_CLAIMED_UNSUCESSFUL", 200);
+
+                  // reserve a stock hold
+                  await db.insert(stockHold).values({
+                    commentId,
+                    userId: page.userId,
+                    customerId: createdCustomer.id,
+                    expiresAt: new Date(sentAt * 1000 + EIGHT_HOURS_MS),
+                    productId: foundProduct.id,
+                    quantity: claim.quantity,
+                    liveStreamId: foundLiveStream.id,
+                  });
+
+                  // reduce the stock
+                  await db
+                    .update(product)
+                    .set({
+                      stock: available - claim.quantity,
+                    })
+                    .where(eq(product.id, foundProduct.id));
+
+                  return c.text("PRODUCT_CLAIMED_SUCCESSFULLY", 200);
+                } catch (e: any) {
+                  // return c.text("PRODUCT_CLAIMED_UNSUCCESSFUL", 200);
+                  return c.text(e.message, 200);
+                }
+              }
+            } else {
+              console.log(`Ignored non-claim comment: "${messageText}"`);
+            }
+          }
+        }
+      }
+    }
+
+    return c.text("EVENT_RECEIVED", 200);
   }) satisfies Handler,
   connect: (async (c) => {
     const user = c.get("user");

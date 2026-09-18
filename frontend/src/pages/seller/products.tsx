@@ -52,7 +52,13 @@ const columns = columnHelper.columns([
   }),
   columnHelper.accessor("holds", {
     header: "On Hold",
-    cell: (info) => <span>{info.getValue().length}</span>,
+    cell: (info) => {
+      const totalWithHeld = info
+        .getValue()
+        .reduce((sum, prod) => sum + prod.quantity, 0);
+
+      return <span>{totalWithHeld}</span>;
+    },
     size: 100,
   }),
   columnHelper.display({
@@ -74,9 +80,7 @@ const SellerProducts = () => {
   return (
     <div>
       <header className="mb-6">
-        <h1 className="text-xl font-semibold text-foreground">
-          Products & Codes
-        </h1>
+        <h1 className="text-xl font-semibold text-foreground">Products</h1>
         <p className="text-sm text-muted-foreground">
           Manage product inventory, pricing, stock levels, and map custom
           comment trigger codes.

@@ -6,6 +6,7 @@ export const relations = defineRelations(schema, (r) => ({
     sessions: r.many.session(),
     accounts: r.many.account(),
     products: r.many.product(),
+    stockHolds: r.many.stockHold(),
     customers: r.many.customer(),
     orders: r.many.order(),
     facebookPages: r.many.facebookPage(),
@@ -64,6 +65,10 @@ export const relations = defineRelations(schema, (r) => ({
     liveStream: r.one.liveStream({
       from: r.stockHold.liveStreamId,
       to: r.liveStream.id,
+    }),
+    user: r.one.user({
+      from: r.stockHold.userId,
+      to: r.user.id,
     }),
   },
   order: {

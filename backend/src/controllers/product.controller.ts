@@ -6,7 +6,11 @@ export const productControllers = {
     const products = await db.query.product.findMany({
       limit: 20,
       with: {
-        holds: true,
+        holds: {
+          columns: {
+            quantity: true,
+          },
+        },
       },
     });
 

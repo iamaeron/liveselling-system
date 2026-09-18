@@ -6,6 +6,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { AppLayout } from "./layouts/app-layout";
 import SellerProducts from "./pages/seller/products";
 import SellerFacebookPage from "./pages/seller/facebook";
+import SellerStockHolds from "./pages/seller/holds";
 
 export function createRouter(queryClient: QueryClient) {
   return createBrowserRouter([
@@ -30,6 +31,10 @@ export function createRouter(queryClient: QueryClient) {
         {
           path: "products",
           Component: SellerProducts,
+        },
+        {
+          path: "holds",
+          Component: SellerStockHolds,
         },
         {
           path: "settings",

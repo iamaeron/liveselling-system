@@ -40,7 +40,7 @@ export const sidebarNavigation = [
         badge: "Live",
       },
       {
-        label: "Products & Codes",
+        label: "Products",
         icon: BoxIcon,
         activeIcon: BoxIconBold,
         link: "/seller/products",
