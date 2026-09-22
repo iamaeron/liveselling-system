@@ -2,7 +2,14 @@ import { useTable } from "@tanstack/react-table";
 import type { ColumnDef, RowData } from "@tanstack/react-table";
 import { tableFeatureSet } from "./table-features";
 import { Input } from "../ui/input";
-import { MagnifierIcon } from "@solar-icons/react/linear";
+import {
+  AltArrowLeftIcon,
+  AltArrowRightIcon,
+  DoubleAltArrowLeftIcon,
+  DoubleAltArrowRightIcon,
+  MagnifierIcon,
+} from "@solar-icons/react/linear";
+import { ActionIcon } from "../ui/action-icon";
 
 export interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<typeof tableFeatureSet, TData>[];
@@ -146,34 +153,52 @@ export function DataTable<TData extends RowData>({
           {Math.max(table.getPageCount(), 1)} &middot; {rows.length} rows
         </span>
         <div className="flex items-center gap-1">
-          <button
+          {/* <button
+            className="rounded-full border border-zinc-300 p-1 disabled:opacity-40"
+            >
+            «
+            </button> */}
+          <ActionIcon
+            className="p-0.5"
             onClick={() => table.firstPage()}
             disabled={!table.getCanPreviousPage()}
-            className="rounded-full border border-zinc-300 p-1 disabled:opacity-40"
+            size="sm"
+            variant="outline"
           >
-            «
-          </button>
-          <button
+            <DoubleAltArrowLeftIcon />
+          </ActionIcon>
+
+          <ActionIcon
+            className="p-0.5"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="rounded-full border border-zinc-300 p-1 disabled:opacity-40"
+            size="sm"
+            variant="outline"
           >
+            <AltArrowLeftIcon />
+          </ActionIcon>
+          {/* <button className="rounded-full border border-zinc-300 p-1 disabled:opacity-40">
             ‹
-          </button>
-          <button
+          </button> */}
+          <ActionIcon
+            className="p-0.5"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="rounded-full border border-zinc-300 p-1 disabled:opacity-40"
+            size="sm"
+            variant="outline"
           >
-            ›
-          </button>
-          <button
+            <AltArrowRightIcon />
+          </ActionIcon>
+
+          <ActionIcon
+            className="p-0.5"
             onClick={() => table.lastPage()}
             disabled={!table.getCanNextPage()}
-            className="rounded-full border border-zinc-300 p-1 disabled:opacity-40"
+            size="sm"
+            variant="outline"
           >
-            »
-          </button>
+            <DoubleAltArrowRightIcon />
+          </ActionIcon>
         </div>
       </div>
     </div>

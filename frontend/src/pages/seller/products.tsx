@@ -7,6 +7,7 @@ import { ActionIcon } from "@/components/ui/action-icon";
 import { MenuDotsIcon } from "@solar-icons/react/bold";
 import { Button } from "@/components/ui/button";
 import { AddIcon } from "@solar-icons/react/linear";
+import { NumberFormatter } from "@/components/ui/number-formatter";
 
 const columnHelper = createColumnHelper<
   typeof tableFeatureSet,
@@ -14,11 +15,12 @@ const columnHelper = createColumnHelper<
 >();
 
 const columns = columnHelper.columns([
-  columnHelper.display({
+  columnHelper.accessor((_, idx) => idx + 1, {
     id: "rowNumber",
-    header: "#",
+    header: () => <span className="text-zinc-400">#</span>,
     size: 48,
-    cell: (info) => info.row.index + 1,
+    sortFn: "auto",
+    cell: (info) => <span className="text-zinc-400">{info.row.index + 1}</span>,
     meta: { align: "center" },
   }),
   columnHelper.accessor("name", {
@@ -40,7 +42,7 @@ const columns = columnHelper.columns([
     cell: (info) => (
       <span>
         <span className="text-muted-foreground">₱</span>
-        {info.getValue()}
+        <NumberFormatter value={Number(info.getValue())} />
       </span>
     ),
     size: 140,

@@ -1,3 +1,4 @@
+import CopyCheckoutLinkMenuItem from "@/components/seller/copy-checkout-link-menu-item";
 import { CountdownTimer } from "@/components/seller/timer-count";
 import { DataTable } from "@/components/table";
 import type { tableFeatureSet } from "@/components/table/table-features";
@@ -5,7 +6,6 @@ import { ActionIcon } from "@/components/ui/action-icon";
 import { Button } from "@/components/ui/button";
 import {
   Menu,
-  MenuGroupLabel,
   MenuItem,
   MenuPopup,
   MenuPortal,
@@ -13,15 +13,14 @@ import {
   MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu";
+import { NumberFormatter } from "@/components/ui/number-formatter";
 import { useFetchStockHolds } from "@/lib/fetcher/stock-hold.fetcher";
 import type { GetStockHoldsReturnValue } from "@shared/types/db.type";
 import { MenuDotsIcon } from "@solar-icons/react/bold";
 import {
-  AddIcon,
   AlarmAddIcon,
   ChatRoundIcon,
-  CloseIcon,
-  LinkMinimalistic2Icon,
+  ExportIcon,
   RepeatIcon,
   Tuning2Icon,
   UndoLeftRoundIcon,
@@ -34,10 +33,11 @@ const columnHelper = createColumnHelper<
 >();
 
 const columns = columnHelper.columns([
-  columnHelper.display({
+  columnHelper.accessor((_, idx) => idx + 1, {
     id: "rowNumber",
     header: () => <span className="text-zinc-400">#</span>,
     size: 48,
+    sortFn: "auto",
     cell: (info) => <span className="text-zinc-400">{info.row.index + 1}</span>,
     meta: { align: "center" },
   }),
@@ -68,10 +68,10 @@ const columns = columnHelper.columns([
         <span>
           {" "}
           <span className="text-muted-foreground">₱</span>
-          {total}{" "}
+          <NumberFormatter value={total} />{" "}
           {inf.quantity > 1 && (
             <span className="text-muted-foreground">
-              ({inf.product.price} each)
+              (<NumberFormatter value={Number(inf.product.price)} /> each)
             </span>
           )}
         </span>
@@ -92,68 +92,64 @@ const columns = columnHelper.columns([
   columnHelper.accessor((row) => row, {
     header: " ",
     size: 48,
-    cell: () => (
-      <div>
-        <Menu>
-          <MenuTrigger render={<ActionIcon variant="ghost" />}>
-            <MenuDotsIcon size={16} />
-          </MenuTrigger>
-          <MenuPortal>
-            <MenuPositioner align="end" sideOffset={6}>
-              <MenuPopup className="min-w-56">
-                {/* <MenuGroupLabel>{info.getValue().}</MenuGroupLabel> */}
-                <MenuItem>
-                  <LinkMinimalistic2Icon
-                    strokeWidth={2}
-                    size={16}
-                    className="text-zinc-600"
+    cell: (row) => {
+      return (
+        <div>
+          <Menu>
+            <MenuTrigger render={<ActionIcon variant="ghost" />}>
+              <MenuDotsIcon size={16} />
+            </MenuTrigger>
+            <MenuPortal>
+              <MenuPositioner align="end" sideOffset={6}>
+                <MenuPopup className="min-w-56">
+                  <CopyCheckoutLinkMenuItem
+                    fbId={row.getValue().customer.facebookPsid}
                   />
-                  Copy Checkout Link
-                </MenuItem>
-                <MenuItem>
-                  <ChatRoundIcon
-                    strokeWidth={2}
-                    size={16}
-                    className="text-zinc-600"
-                  />
-                  View Comment on Facebook
-                </MenuItem>
-                <MenuSeparator />
-                <MenuItem>
-                  <AlarmAddIcon
-                    strokeWidth={2}
-                    size={16}
-                    className="text-zinc-600"
-                  />
-                  Extend Reservation Time
-                </MenuItem>
-                <MenuItem>
-                  <RepeatIcon
-                    strokeWidth={2}
-                    size={16}
-                    className="text-zinc-600"
-                  />
-                  Convert to Manual Order
-                </MenuItem>
-                <MenuItem>
-                  <Tuning2Icon
-                    strokeWidth={2}
-                    size={16}
-                    className="text-zinc-600"
-                  />
-                  Adjust Quantity
-                </MenuItem>
-                <MenuSeparator />
-                <MenuItem className="text-rose-700">
-                  <UndoLeftRoundIcon strokeWidth={2} size={16} />
-                  Release Hold
-                </MenuItem>
-              </MenuPopup>
-            </MenuPositioner>
-          </MenuPortal>
-        </Menu>
-      </div>
-    ),
+                  <MenuItem>
+                    <ChatRoundIcon
+                      strokeWidth={2}
+                      size={16}
+                      className="text-zinc-600"
+                    />
+                    View Comment on Facebook
+                  </MenuItem>
+                  <MenuSeparator />
+                  <MenuItem>
+                    <AlarmAddIcon
+                      strokeWidth={2}
+                      size={16}
+                      className="text-zinc-600"
+                    />
+                    Extend Reservation Time
+                  </MenuItem>
+                  <MenuItem>
+                    <RepeatIcon
+                      strokeWidth={2}
+                      size={16}
+                      className="text-zinc-600"
+                    />
+                    Convert to Manual Order
+                  </MenuItem>
+                  <MenuItem>
+                    <Tuning2Icon
+                      strokeWidth={2}
+                      size={16}
+                      className="text-zinc-600"
+                    />
+                    Adjust Quantity
+                  </MenuItem>
+                  <MenuSeparator />
+                  <MenuItem className="text-rose-700">
+                    <UndoLeftRoundIcon strokeWidth={2} size={16} />
+                    Release Hold
+                  </MenuItem>
+                </MenuPopup>
+              </MenuPositioner>
+            </MenuPortal>
+          </Menu>
+        </div>
+      );
+    },
   }),
 ]);
 
@@ -181,8 +177,8 @@ const SellerStockHolds = () => {
           tableKey="people-table"
           rightAction={
             <Button>
-              <AddIcon size={16} strokeWidth={2} />
-              Add Product
+              <ExportIcon size={16} strokeWidth={2} />
+              Export
             </Button>
           }
         />

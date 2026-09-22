@@ -7,6 +7,10 @@ import { AppLayout } from "./layouts/app-layout";
 import SellerProducts from "./pages/seller/products";
 import SellerFacebookPage from "./pages/seller/facebook";
 import SellerStockHolds from "./pages/seller/holds";
+import SellerOrders from "./pages/seller/order";
+import SellerCustomers from "./pages/seller/customer";
+import SellerLiveStreams from "./pages/seller/live-stream";
+import BuyerCart from "./pages/checkout";
 
 export function createRouter(queryClient: QueryClient) {
   return createBrowserRouter([
@@ -18,6 +22,11 @@ export function createRouter(queryClient: QueryClient) {
       path: "/login",
       loader: publicOnlyLoader(queryClient),
       Component: Login,
+    },
+    {
+      path: "/checkout",
+      // loader: publicOnlyLoader(queryClient),
+      Component: BuyerCart,
     },
     {
       path: "seller",
@@ -35,6 +44,18 @@ export function createRouter(queryClient: QueryClient) {
         {
           path: "holds",
           Component: SellerStockHolds,
+        },
+        {
+          path: "orders",
+          Component: SellerOrders,
+        },
+        {
+          path: "customers",
+          Component: SellerCustomers,
+        },
+        {
+          path: "live-streams",
+          Component: SellerLiveStreams,
         },
         {
           path: "settings",

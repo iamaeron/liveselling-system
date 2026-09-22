@@ -37,7 +37,7 @@ export const sidebarNavigation = [
         icon: VideocameraIcon,
         activeIcon: VideocameraIconBold,
         link: "/seller/live-streams",
-        badge: "Live",
+        // badge: "Live",
       },
       {
         label: "Products",
