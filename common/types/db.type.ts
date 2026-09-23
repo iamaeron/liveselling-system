@@ -57,3 +57,36 @@ export type GetStockHoldsReturnValue = {
     isActive: boolean;
   };
 };
+
+export type GetCustomersReturnValue = {
+  id: string;
+  createdAt: Date;
+  userId: string;
+  facebookPsid: string;
+  facebookName: string | null;
+  orders: {
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    userId: string;
+    customerId: string;
+    status: "cancelled" | "pending_payment" | "paid" | "shipped";
+    totalAmount: string;
+    shippingAddress: string | null;
+    phoneNumber: string | null;
+    paymentProofUrl: string | null;
+  }[];
+  holds: {
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    expiresAt: Date;
+    userId: string;
+    productId: string;
+    customerId: string;
+    liveStreamId: string | null;
+    commentId: string;
+    quantity: number;
+    status: "reserved" | "confirmed" | "expired" | "cancelled";
+  }[];
+};

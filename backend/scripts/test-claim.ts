@@ -40,5 +40,6 @@ async function sendTestClaim(name: string, id: string, commentText: string) {
 
 // Run test cases
 sendTestClaim("Senku Ishigami", "5438574385", "Mine 3AB 3x");
+sendTestClaim("Senku Ishigami", "5438574385", "Mine 01A 4x");
 sendTestClaim("Jane Patrick", "575834579", "Mine 5ZZ 7x");
 sendTestClaim("Matt Murdock", "534657436", "Mine 10X x4");

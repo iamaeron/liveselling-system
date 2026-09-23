@@ -6,6 +6,7 @@ import productsRoutes from "./routes/product.route";
 import facebookRoutes from "./routes/facebook.route";
 import stockHoldRoutes from "./routes/stock-hold.route";
 import cartRoutes from "./routes/cart.route";
+import customerRoutes from "./routes/customer.route";
 
 const app = new Hono();
 
@@ -37,6 +38,7 @@ app.route("/api", productsRoutes);
 app.route("/api", facebookRoutes);
 app.route("/api", stockHoldRoutes);
 app.route("/api", cartRoutes);
+app.route("/api", customerRoutes);
 
 serve(
   {

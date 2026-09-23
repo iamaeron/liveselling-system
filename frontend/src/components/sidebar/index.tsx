@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ActionIcon } from "@/components/ui/action-icon";
 import { sidebarNavigation } from "@/constants/nav-links";
 import NavItem from "./nav-item";
+import { LogoutIcon } from "@solar-icons/react/bold-duotone";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -88,8 +89,14 @@ const Sidebar = () => {
         ))}
       </div>
       {/* <hr className="border-t border-zinc-200" /> */}
-      <div className="p-2">
-        <button onClick={handleSignOut}>logout</button>
+      <div className="p-3">
+        <button
+          onClick={handleSignOut}
+          className="flex gap-3 items-center font-medium text-sm text-muted-foreground px-2.5 py-1.5 hover:bg-zinc-200 rounded-lg w-full hover:text-zinc-700"
+        >
+          <LogoutIcon strokeWidth={2} size={20} className="shrink-0" />
+          <span>Log out</span>
+        </button>
       </div>
     </aside>
     // </div>

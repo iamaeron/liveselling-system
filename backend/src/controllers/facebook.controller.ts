@@ -6,6 +6,7 @@ import {
   product,
   stockHold,
 } from "@/db/schema";
+import { ensureCustomerExists } from "@/lib/ensure-customer";
 import { ensureLiveStreamExists } from "@/lib/ensure-livestream";
 import { parseCommentClaim } from "@/lib/parse-comment-claim";
 import "dotenv/config";
@@ -86,26 +87,19 @@ export const facebookControllers = {
                 return c.text("PRODUCT_NOT_FOUND_HANDLED", 200);
               }
 
-              // const productStockHolds = await db.query.stockHold.findMany({
-              //   where: {
-              //     productId: foundProduct.id,
-              //   },
-              //   columns: {
-              //     quantity: true,
-              //   },
-              // });
-
-              const productStockHolds = await db
-                .select({ quantity: stockHold.quantity })
-                .from(stockHold)
-                .where(
-                  and(
-                    eq(stockHold.userId, page.userId),
-                    eq(stockHold.productId, foundProduct.id),
-                    eq(stockHold.status, "reserved"),
-                    gte(stockHold.expiresAt, new Date()),
-                  ),
-                );
+              const productStockHolds = await db.query.stockHold.findMany({
+                where: {
+                  productId: foundProduct.id,
+                  userId: page.userId,
+                  status: "reserved",
+                  expiresAt: {
+                    gte: new Date(),
+                  },
+                },
+                columns: {
+                  quantity: true,
+                },
+              });
 
               const productWithHeldStock = productStockHolds.reduce(
                 (sum, hold) => sum + hold.quantity,
@@ -116,21 +110,16 @@ export const facebookControllers = {
               if (available >= claim.quantity) {
                 try {
                   // insert customer first
-                  const [createdCustomer] = await db
-                    .insert(customer)
-                    .values({
-                      facebookPsid: senderId,
-                      facebookName: senderName,
-                      userId: page.userId,
-                    })
-                    .onConflictDoUpdate({
-                      target: [customer.userId, customer.facebookPsid],
-                      set: {
-                        facebookName: senderName,
-                      },
-                    })
-                    .returning();
+                  const foundCustomer = await ensureCustomerExists(
+                    page.userId,
+                    senderId,
+                    senderName,
+                  );
 
+                  if (!foundCustomer)
+                    return c.text("PRODUCT_CLAIMED_UNSUCESSFUL", 200);
+
+                  // then livestream
                   const foundLiveStream = await ensureLiveStreamExists(
                     page.id,
                     postId,
@@ -143,7 +132,7 @@ export const facebookControllers = {
                   await db.insert(stockHold).values({
                     commentId,
                     userId: page.userId,
-                    customerId: createdCustomer.id,
+                    customerId: foundCustomer.id,
                     expiresAt: new Date(sentAt * 1000 + EIGHT_HOURS_MS),
                     productId: foundProduct.id,
                     quantity: claim.quantity,
