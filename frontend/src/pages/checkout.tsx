@@ -1,10 +1,20 @@
+import { ActionIcon } from "@/components/ui/action-icon";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox, CheckboxIndicator } from "@/components/ui/checkbox";
+import {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { NumberFormatter } from "@/components/ui/number-formatter";
 import { useFetchCart } from "@/lib/fetcher/cart.fetcher";
 import { BagHeartIcon } from "@solar-icons/react/bold";
-import { ArrowRightIcon } from "@solar-icons/react/linear";
+import { AltArrowUpIcon, ArrowRightIcon } from "@solar-icons/react/linear";
+import { cn } from "cn";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 
 const BuyerCart = () => {
@@ -12,7 +22,40 @@ const BuyerCart = () => {
   const { data, isPending } = useFetchCart({
     token: searchParams.get("token"),
   });
-  console.log(data);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!isPending) {
+      data.stockHolds.forEach((stock: any) =>
+        setSelectedItems((s) => [...s, stock.id]),
+      );
+    }
+  }, [isPending, data]);
+
+  const handleToggleSelect = (selected: boolean, item: any) => {
+    if (selected) {
+      setSelectedItems((s) => [...s, item.id]);
+    } else {
+      const newItems = selectedItems.filter((s) => s !== item.id);
+      setSelectedItems(newItems);
+    }
+  };
+
+  const handleToggleAll = (selected: boolean) => {
+    if (data?.stockHolds) {
+      if (selected) {
+        setSelectedItems([]);
+        data.stockHolds.forEach((item: any) => {
+          setSelectedItems((s) => [...s, item.id]);
+        });
+      } else {
+        setSelectedItems([]);
+      }
+    }
+  };
+
+  console.log(selectedItems, data?.stockHolds.length);
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center mb-6 py-2 justify-between">
@@ -49,7 +92,7 @@ const BuyerCart = () => {
             {isPending ? (
               <div>Loading ...</div>
             ) : (
-              <div>
+              <div className="pb-70">
                 <div className="py-2 px-4 rounded gap-6 mb-6 bg-zinc-100">
                   <p className="text-xs text-muted-foreground">Customer</p>
                   <div className="flex text-sm text-zinc-900">
@@ -63,7 +106,12 @@ const BuyerCart = () => {
                       <tr>
                         <th className="px-3 w-10">
                           <div className="flex justify-center">
-                            <Checkbox defaultChecked>
+                            <Checkbox
+                              onCheckedChange={handleToggleAll}
+                              checked={
+                                selectedItems.length === data.stockHolds.length
+                              }
+                            >
                               <CheckboxIndicator />
                             </Checkbox>
                           </div>
@@ -101,7 +149,12 @@ const BuyerCart = () => {
                         >
                           <td className="w-10">
                             <div className="flex justify-center">
-                              <Checkbox defaultChecked>
+                              <Checkbox
+                                onCheckedChange={(e) =>
+                                  handleToggleSelect(e, stockHold)
+                                }
+                                checked={selectedItems.includes(stockHold.id)}
+                              >
                                 <CheckboxIndicator />
                               </Checkbox>
                             </div>
@@ -144,86 +197,66 @@ const BuyerCart = () => {
                   </table>
                 </div>
 
-                <div className="fixed bottom-0 max-w-2xl w-full border-t border-zinc-100 pb-6 pt-4 mt-10 px-8">
-                  <div className="flex items-end">
-                    <p className="text-sm text-muted-foreground text-right flex-2">
-                      Selected Items:
-                    </p>
-                    <div className="flex-1 flex text-zinc-700 justify-end">
-                      {data.stockHolds.reduce(
-                        (sum: any, s: any) => sum + s.quantity,
-                        0,
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-end">
-                    <p className="text-sm text-muted-foreground text-right flex-2">
-                      Subtotal:
-                    </p>
-                    <div className="flex-1 flex justify-end">
-                      <span className="flex text-zinc-700 items-baseline">
-                        <span className="text-muted-foreground">₱</span>
-                        <NumberFormatter
-                          value={Number(
-                            data.stockHolds.reduce(
-                              (sum: any, q: any) =>
-                                sum + q.product.price * q.quantity,
-                              0,
-                            ),
-                          )}
-                        />
-                      </span>
-                    </div>
-                  </div>
+                <div className="mt-10 border-t pt-4 border-zinc-100">
+                  <h1 className="pl-2 text-base font-semibold text-foreground">
+                    Contact
+                  </h1>
 
-                  <div className="flex items-end">
-                    <p className="text-sm text-muted-foreground text-right flex-2">
-                      Shipping fee:
-                    </p>
-                    <div className="flex-1 flex justify-end">
-                      <span className="flex text-zinc-700 items-baseline">
-                        <span className="text-muted-foreground">₱</span>
-                        <NumberFormatter value={200} />
-                      </span>
-                    </div>
-                  </div>
+                  <div>
+                    <Field name="receiver_name" className="mt-4">
+                      <FieldLabel>Receiver Name</FieldLabel>
+                      <FieldControl render={<Input placeholder="John Doe" />} />
+                    </Field>
 
-                  <div className="flex items-end">
-                    <p className="text-sm text-muted-foreground text-right flex-2">
-                      Discout:
-                    </p>
-                    <div className="flex-1 flex justify-end">
-                      <span className="flex text-zinc-700 items-baseline">
-                        <span className="text-muted-foreground">- ₱</span>
-                        <NumberFormatter value={0} />
-                      </span>
-                    </div>
+                    <Field name="receiver_name" className="mt-4">
+                      <FieldLabel>Phone No.</FieldLabel>
+                      <FieldControl
+                        render={<Input placeholder="0912 345 6789" />}
+                      />
+                    </Field>
                   </div>
-                  <div className="flex items-end border-t border-zinc-200 border-dashed mt-4 pt-4">
-                    <p className="text-pink-600 text-right flex-2 font-medium">
-                      Total:
-                    </p>
-                    <div className="flex-1 flex justify-end">
-                      <span className="flex items-baseline text-pink-600">
-                        <span>₱</span>
-                        <span className="text-2xl font-medium">
-                          {/* <NumberFormatter
-                            value={Number(
-                              stockHold.product.price * stockHold.total,
-                            )}
-                          /> */}
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-
-                  <footer className="mt-6 flex items-center justify-end">
-                    <Button>
-                      Payment Details
-                      <ArrowRightIcon strokeWidth={2} />
-                    </Button>
-                  </footer>
                 </div>
+
+                <div className="mt-10 border-t pt-4 border-zinc-100">
+                  <h1 className="pl-2 text-base font-semibold text-foreground">
+                    Address
+                  </h1>
+
+                  <div>
+                    <Field name="receiver_name" className="mt-4">
+                      <FieldLabel>Bldg No.</FieldLabel>
+                      <FieldControl render={<Input placeholder="John Doe" />} />
+                    </Field>
+
+                    <Field name="receiver_name" className="mt-4">
+                      <FieldLabel>Street</FieldLabel>
+                      <FieldControl
+                        render={<Input placeholder="0912 345 6789" />}
+                      />
+                    </Field>
+                  </div>
+                </div>
+
+                <div className="mt-10 border-t pt-4 border-zinc-100">
+                  <h1 className="pl-2 text-base font-semibold text-foreground">
+                    Payment
+                  </h1>
+
+                  <div>
+                    <Field name="receiver_name" className="mt-4">
+                      <FieldLabel>Proof of Payment</FieldLabel>
+                      <FieldControl render={<Input type="file" />} />
+                      <FieldDescription>
+                        Your payment will be verified by the seller.
+                      </FieldDescription>
+                    </Field>
+                  </div>
+                </div>
+
+                <PricingInfo
+                  stockHolds={data.stockHolds}
+                  selectedItems={selectedItems}
+                />
               </div>
             )}
           </main>
@@ -236,3 +269,113 @@ const BuyerCart = () => {
 };
 
 export default BuyerCart;
+
+const PricingInfo = ({
+  stockHolds,
+  selectedItems,
+}: {
+  stockHolds: { [k: string]: string }[];
+  selectedItems: string[];
+}) => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [subtotal, setSubtotal] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  useEffect(() => {
+    const filteredStockHolds = stockHolds.filter((s) =>
+      selectedItems.includes(s.id),
+    );
+
+    const newSub = filteredStockHolds.reduce(
+      (sum: any, st: any) => sum + st.product.price * st.quantity,
+      0,
+    );
+    setSubtotal(newSub);
+
+    const newTotal = newSub + 200 - 0;
+    setTotalPrice(newTotal);
+  }, [selectedItems]);
+
+  return (
+    <div
+      className={cn(
+        "fixed bottom-0 max-w-2xl bg-white/30 backdrop-blur-sm w-full border-t  border-dashed pb-6 pt-2 mt-10 px-6",
+        collapsed ? "border-transparent" : "border-zinc-300",
+      )}
+    >
+      {collapsed ? null : (
+        <div className="pb-2">
+          <div className="flex items-end">
+            <p className="text-sm text-muted-foreground text-right flex-2">
+              Subtotal:
+            </p>
+            <div className="flex-1 flex justify-end">
+              <span className="flex text-zinc-700 items-baseline">
+                <span className="text-muted-foreground">₱</span>
+                <NumberFormatter value={Number(subtotal)} />
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-end">
+            <p className="text-sm text-muted-foreground text-right flex-2">
+              Shipping fee:
+            </p>
+            <div className="flex-1 flex justify-end">
+              <span className="flex text-zinc-700 items-baseline">
+                <span className="text-muted-foreground">₱</span>
+                <NumberFormatter value={200} />
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-end">
+            <p className="text-sm text-muted-foreground text-right flex-2">
+              Discount:
+            </p>
+            <div className="flex-1 flex justify-end">
+              <span className="flex text-zinc-700 items-baseline">
+                <span className="text-muted-foreground">- ₱</span>
+                <NumberFormatter value={0} />
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-end border-t border-zinc-200 border-dashed relative pt-2">
+        <ActionIcon
+          onClick={() => setCollapsed(!collapsed)}
+          className="absolute left-full p-1 -top-4"
+          variant="ghost"
+          size="sm"
+        >
+          <AltArrowUpIcon
+            strokeWidth={2}
+            className={cn(
+              "transition-all",
+              collapsed ? "rotate-90" : "rotate-0",
+            )}
+          />
+        </ActionIcon>
+
+        <p className="text-pink-600 text-right flex-2 font-medium">Total:</p>
+        <div className="flex-1 flex justify-end">
+          <span className="flex items-baseline text-pink-600">
+            <span>₱</span>
+            <span className="text-2xl font-medium">
+              <NumberFormatter value={Number(totalPrice)} />
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <footer className="mt-2 flex items-center justify-end">
+        <Button disabled={!selectedItems.length}>
+          Check out
+          <ArrowRightIcon strokeWidth={2} />
+        </Button>
+      </footer>
+    </div>
+  );
+};
