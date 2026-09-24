@@ -3,6 +3,21 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox, CheckboxIndicator } from "@/components/ui/checkbox";
 import {
+  Combobox,
+  ComboboxEmpty,
+  ComboboxIcon,
+  ComboboxInput,
+  ComboboxInputGroup,
+  ComboboxItem,
+  ComboboxItemIndicator,
+  ComboboxLabel,
+  ComboboxList,
+  ComboboxPopup,
+  ComboboxPortal,
+  ComboboxPositioner,
+  ComboboxTrigger,
+} from "@/components/ui/combobox";
+import {
   Field,
   FieldControl,
   FieldDescription,
@@ -13,6 +28,7 @@ import { NumberFormatter } from "@/components/ui/number-formatter";
 import { useFetchCart } from "@/lib/fetcher/cart.fetcher";
 import { BagHeartIcon } from "@solar-icons/react/bold";
 import { AltArrowUpIcon, ArrowRightIcon } from "@solar-icons/react/linear";
+import { CheckIcon } from "@solar-icons/react/linear/check";
 import { cn } from "cn";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
@@ -223,17 +239,64 @@ const BuyerCart = () => {
                   </h1>
 
                   <div>
-                    <Field name="receiver_name" className="mt-4">
-                      <FieldLabel>Bldg No.</FieldLabel>
-                      <FieldControl render={<Input placeholder="John Doe" />} />
-                    </Field>
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <Combobox items={["React", "Solid", "Vue", "Svelte"]}>
+                          <ComboboxLabel>Framework</ComboboxLabel>
+                          <ComboboxInputGroup>
+                            <ComboboxInput placeholder="Search..." />
+                            <ComboboxTrigger>
+                              <ComboboxIcon />
+                            </ComboboxTrigger>
+                          </ComboboxInputGroup>
+                          <ComboboxPortal>
+                            <ComboboxPositioner sideOffset={4}>
+                              <ComboboxPopup>
+                                <ComboboxEmpty>
+                                  <div className="py-4">No results found.</div>
+                                </ComboboxEmpty>
+                                <ComboboxList>
+                                  {(item: string) => (
+                                    <ComboboxItem
+                                      key={item}
+                                      value={item}
+                                      className="gap-1 pl-1"
+                                    >
+                                      <div className="w-5">
+                                        <ComboboxItemIndicator>
+                                          <CheckIcon
+                                            size={18}
+                                            strokeWidth={2}
+                                          />
+                                        </ComboboxItemIndicator>
+                                      </div>
+                                      <div className="flex-1">{item}</div>
+                                    </ComboboxItem>
+                                  )}
+                                </ComboboxList>
+                              </ComboboxPopup>
+                            </ComboboxPositioner>
+                          </ComboboxPortal>
+                        </Combobox>
+                      </div>
+                      <div className="flex-1"></div>
+                    </div>
 
-                    <Field name="receiver_name" className="mt-4">
-                      <FieldLabel>Street</FieldLabel>
-                      <FieldControl
-                        render={<Input placeholder="0912 345 6789" />}
-                      />
-                    </Field>
+                    <div className="flex items-center gap-4">
+                      <Field name="receiver_name" className="flex-1 mt-4">
+                        <FieldLabel>Bldg No.</FieldLabel>
+                        <FieldControl
+                          render={<Input placeholder="John Doe" />}
+                        />
+                      </Field>
+
+                      <Field name="receiver_name" className="flex-1 mt-4">
+                        <FieldLabel>Street</FieldLabel>
+                        <FieldControl
+                          render={<Input placeholder="0912 345 6789" />}
+                        />
+                      </Field>
+                    </div>
                   </div>
                 </div>
 
@@ -299,14 +362,13 @@ const PricingInfo = ({
   return (
     <div
       className={cn(
-        "fixed bottom-0 max-w-2xl bg-white/30 backdrop-blur-sm w-full border-t  border-dashed pb-6 pt-2 mt-10 px-6",
-        collapsed ? "border-transparent" : "border-zinc-300",
+        "fixed bottom-6 max-w-2xl left-1/2 -translate-x-1/2 bg-linear-to-t from-pink-50 to-white border-4 border-white backdrop-blur-sm rounded-xl w-full shadow-2xl shadow-black/10 pb-6 pt-2 mt-10 px-16",
       )}
     >
       {collapsed ? null : (
         <div className="pb-2">
           <div className="flex items-end">
-            <p className="text-sm text-muted-foreground text-right flex-2">
+            <p className="text-sm text-muted-foreground text-right flex-3">
               Subtotal:
             </p>
             <div className="flex-1 flex justify-end">
@@ -318,7 +380,7 @@ const PricingInfo = ({
           </div>
 
           <div className="flex items-end">
-            <p className="text-sm text-muted-foreground text-right flex-2">
+            <p className="text-sm text-muted-foreground text-right flex-3">
               Shipping fee:
             </p>
             <div className="flex-1 flex justify-end">
@@ -330,7 +392,7 @@ const PricingInfo = ({
           </div>
 
           <div className="flex items-end">
-            <p className="text-sm text-muted-foreground text-right flex-2">
+            <p className="text-sm text-muted-foreground text-right flex-3">
               Discount:
             </p>
             <div className="flex-1 flex justify-end">
@@ -343,10 +405,15 @@ const PricingInfo = ({
         </div>
       )}
 
-      <div className="flex items-end border-t border-zinc-200 border-dashed relative pt-2">
+      <div
+        className={cn(
+          "flex items-end border-t border-dashed pt-2",
+          collapsed ? "border-transparent" : "border-zinc-300",
+        )}
+      >
         <ActionIcon
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute left-full p-1 -top-4"
+          className="absolute p-1 bottom-6 right-4"
           variant="ghost"
           size="sm"
         >
@@ -359,7 +426,7 @@ const PricingInfo = ({
           />
         </ActionIcon>
 
-        <p className="text-pink-600 text-right flex-2 font-medium">Total:</p>
+        <p className="text-pink-600 text-right flex-3 font-medium">Total:</p>
         <div className="flex-1 flex justify-end">
           <span className="flex items-baseline text-pink-600">
             <span>₱</span>

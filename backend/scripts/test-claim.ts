@@ -11,7 +11,7 @@ async function sendTestClaim(name: string, id: string, commentText: string) {
             value: {
               item: "comment",
               verb: "add",
-              comment_id: `comment_${Date.now()}`,
+              comment_id: `comment_${Date.now()}_${Math.random()}`,
               post_id: "123456789_post_01",
               created_time: Math.floor(Date.now() / 1000),
               message: commentText,

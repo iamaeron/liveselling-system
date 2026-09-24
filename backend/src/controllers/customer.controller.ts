@@ -12,7 +12,11 @@ export const customerControllers = {
       },
       limit: 20,
       with: {
-        holds: true,
+        holds: {
+          where: {
+            status: "reserved",
+          },
+        },
         orders: true,
       },
     });
